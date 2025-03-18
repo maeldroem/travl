@@ -1,0 +1,26 @@
+[package]
+name = "travl"
+version = "0.0.0"
+authors = ["Mældrøm"]
+edition = "2024"
+description = "Highly-customizable AVL Trees"
+documentation = "https://docs.rs/travl"
+repository = "https://github.com/maeldroem/travl"
+license = "BSD-3-Clause"
+keywords = ["avl", "tree", "map", "set", "ordered"]
+categories = ["data-structures"]
+
+[lints.clippy]
+complexity = "warn"
+perf = "warn"
+style = "warn"
+pedantic = "warn"
+
+[dependencies]
+serde = { version = "1.0.219", optional = true }
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+[features]
+serde = ["dep:serde"]
