@@ -1,3 +1,5 @@
+//! A library for AVL trees and related operations
+
 pub mod core;
 pub mod map;
 pub mod set;
