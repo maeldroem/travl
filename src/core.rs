@@ -33,6 +33,7 @@
 use std::cmp::Ordering;
 
 /// Balance factor
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum BalanceFactor {
     /// Left and right nodes are of same height
     Balanced,
@@ -49,6 +50,7 @@ pub enum BalanceFactor {
 /// AVL tree rotation
 /// 
 /// See [Tree rotation](https://en.wikipedia.org/wiki/Tree_rotation) for more details
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum AVLRotation {
     /// Slide nodes to the right
     Right,
@@ -63,6 +65,7 @@ pub enum AVLRotation {
 }
 
 /// Represents an AVL node
+#[derive(Clone, Debug)]
 pub struct TravlNode<'a, K, V> {
     key: K,
     value: V,
@@ -86,75 +89,91 @@ impl<'a, K, V> TravlNode<'a, K, V> {
     }
 
     /// Returns the node's key
+    #[must_use]
     pub fn key(&self) -> &K {
         &self.key
     }
 
     /// Returns the node's value
+    #[must_use]
     pub fn value(&self) -> &V {
         &self.value
     }
 
     /// Returns a mutable pointer to the node's value
+    #[must_use]
     pub fn value_mut(&mut self) -> &mut V {
         &mut self.value
     }
 
     /// Returns a value from the node's value using a custom getter function
+    #[must_use]
     pub fn prop<P, F>(&self, f: F) -> &P
-    where F: FnOnce(&V) -> &P
+    where
+        F: FnOnce(&V) -> &P
     {
         (f)(self.value())
     }
 
     /// Returns a mutable pointer to a value from the node's value using a custom getter function
+    #[must_use]
     pub fn prop_mut<P, F>(&mut self, f: F) -> &mut P
-    where F: FnOnce(&mut V) -> &mut P
+    where
+        F: FnOnce(&mut V) -> &mut P
     {
         (f)(self.value_mut())
     }
 
     /// Returns the node's height
+    #[must_use]
     pub fn height(&self) -> u64 {
         self.height
     }
 
     /// Returns the node's parent
+    #[must_use]
     pub fn parent(&self) -> Option<&Self> {
         self.parent
     }
 
     /// Returns the node's left child
+    #[must_use]
     pub fn left(&self) -> Option<&Self> {
         self.left
     }
 
     /// Returns the node's right child
+    #[must_use]
     pub fn right(&self) -> Option<&Self> {
         self.right
     }
 
     /// Returns whether is alone: no parents, no children
+    #[must_use]
     pub fn is_alone(&self) -> bool {
         !self.has_parent() && !self.is_internal()
     }
 
     /// Returns whether the node has a parent
+    #[must_use]
     pub fn has_parent(&self) -> bool {
         self.parent().is_some()
     }
 
     /// Returns whether the node has at least one child
+    #[must_use]
     pub fn is_internal(&self) -> bool {
         self.left().is_some() || self.right().is_some()
     }
 
     /// Returns whether the node is a leaf according to its height
+    #[must_use]
     pub fn is_leaf(&self) -> bool {
         self.height() == 0
     }
 
     /// Computes the [`BalanceFactor`] given an imbalance factor
+    #[must_use]
     pub fn balance_factor(&self, imbalance_factor: u64) -> BalanceFactor {
         let left_height = self.left().map_or(0, Self::height);
         let right_height = self.right().map_or(0, Self::height);
@@ -179,36 +198,43 @@ impl<'a, K, V> TravlNode<'a, K, V> {
     }
 
     /// Replaces the node's parent and returns the old value
+    #[must_use]
     pub fn link_parent(&mut self, parent: &'a Self) -> Option<&Self> {
         self.parent.replace(parent)
     }
 
     /// Removes the node's parent and returns the old value
+    #[must_use]
     pub fn unlink_parent(&mut self) -> Option<&Self> {
         self.parent.take()
     }
 
     /// Replaces the node's left child and returns the old value
+    #[must_use]
     pub fn link_left(&mut self, left: &'a Self) -> Option<&Self> {
         self.left.replace(left)
     }
 
     /// Removes the node's left child and returns the old value
+    #[must_use]
     pub fn unlink_left(&mut self) -> Option<&Self> {
         self.left.take()
     }
 
     /// Replaces the node's right child and returns the old value
+    #[must_use]
     pub fn link_right(&mut self, right: &'a Self) -> Option<&Self> {
         self.right.replace(right)
     }
 
     /// Removes the node's right child and returns the old value
+    #[must_use]
     pub fn unlink_right(&mut self) -> Option<&Self> {
         self.right.take()
     }
 
     /// Replaces both children of the node and returns the old values
+    #[must_use]
     pub fn link_children(&mut self, children: (Option<&'a Self>, Option<&'a Self>)) -> (Option<&Self>, Option<&Self>) {
         let mut old_left = None;
         let mut old_right = None;
@@ -225,6 +251,7 @@ impl<'a, K, V> TravlNode<'a, K, V> {
     }
 
     /// Removes the node's children and returns the old value
+    #[must_use]
     pub fn unlink_children(&mut self) -> (Option<&Self>, Option<&Self>) {
         (self.left.take(), self.right.take())
     }
