@@ -1,34 +1,40 @@
 //! AVL nodes, forming a tree
-//! 
+//!
 //! This is a custom AVL tree implementation that includes operations and parameters
 //! that are not usually included in AVL trees but that I find important for
 //! better customization.
-//! 
+//!
 //! Here are some examples.
-//! 
+//!
 //! # Imbalance factor
-//! 
+//!
 //! `travl` allows you to set a custom _imbalance factor_.
 //! Ordinarily, this is usually set to 1, meaning that as soon as the balance factor of
 //! any node exceeds ±1, we need to perform rotations.
-//! 
+//!
 //! However, if your tree is pretty large and you want to avoid immediate rotation on
 //! any insert, you may want to increase the imbalance of the tree.
-//! 
+//!
 //! For example, if you want to allow balance factors up to ±5, you need to set
 //! the imbalance factor to `4` (read as 4 more than the usual balance range)
-//! 
+//!
 //! # Custom ordering
-//! 
+//!
 //! In order not to rely on [`Ord`], which is used for describing how _entire instances_ should be
 //! ordered between themselves, `travl` allows for setting a custom property getter and ordering function.
-//! 
+//!
 //! This enables two things:
-//! 
+//!
 //! 1. Having entire instances (or references to such instances) stored within the tree and being able
 //!     to sort them using an inner property/field
 //! 2. Reordering the tree whenever you want - Not usually useful, but on special occasions where an outside
 //!     factor may change what you calculate to order your instances, it can be useful
+//!
+//! ## About the property getter
+//!
+//! In documentation referencing for example searching a value, you will see the term _desired value_ used.
+//! This term is used for saying "the value itself or, if set to other than an identity function, the value
+//! resulting from the property getter".
 
 use std::cmp::Ordering;
 
@@ -48,7 +54,7 @@ pub enum BalanceFactor {
 }
 
 /// AVL tree rotation
-/// 
+///
 /// See [Tree rotation](https://en.wikipedia.org/wiki/Tree_rotation) for more details
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum AVLRotation {
@@ -110,7 +116,7 @@ impl<'a, K, V> TravlNode<'a, K, V> {
     #[must_use]
     pub fn prop<P, F>(&self, f: F) -> &P
     where
-        F: FnOnce(&V) -> &P
+        F: FnOnce(&V) -> &P,
     {
         (f)(self.value())
     }
@@ -119,7 +125,7 @@ impl<'a, K, V> TravlNode<'a, K, V> {
     #[must_use]
     pub fn prop_mut<P, F>(&mut self, f: F) -> &mut P
     where
-        F: FnOnce(&mut V) -> &mut P
+        F: FnOnce(&mut V) -> &mut P,
     {
         (f)(self.value_mut())
     }
@@ -235,7 +241,10 @@ impl<'a, K, V> TravlNode<'a, K, V> {
 
     /// Replaces both children of the node and returns the old values
     #[must_use]
-    pub fn link_children(&mut self, children: (Option<&'a Self>, Option<&'a Self>)) -> (Option<&Self>, Option<&Self>) {
+    pub fn link_children(
+        &mut self,
+        children: (Option<&'a Self>, Option<&'a Self>),
+    ) -> (Option<&Self>, Option<&Self>) {
         let mut old_left = None;
         let mut old_right = None;
 

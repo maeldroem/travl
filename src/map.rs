@@ -1,5 +1,5 @@
 //! Map similar to [`BTreeMap`](std::collections::BTreeMap) and its operations
-//! 
+//!
 //! Refer to the [`core`](crate::core) module for information about the inner workings
 //! of the AVL tree, its nodes and related operations.
 
@@ -9,23 +9,10 @@ use std::fmt::Debug;
 use std::hash::Hash;
 
 use crate::core::TravlNode;
+use crate::traversal::{Search, SearchQuery};
 
-type PropFn<'a, V, P> = Box<dyn FnMut(&V) -> &P + 'a>;
-type OrdFn<'a, P> = Box<dyn FnMut(&P, &P) -> Ordering + 'a>;
-
-/// Search type when searching for a value in the tree
-#[derive(Default, Debug, Copy, Clone, PartialEq, Eq)]
-pub enum SearchType {
-    /// Strict value equality
-    #[default]
-    Equality,
-    /// Returns nearest value (rounding)
-    Nearest,
-    /// Returns nearest value from the bottom (rounding down)
-    NearestToBottom,
-    /// Returns nearest value from the top (rounding up)
-    NearestToTop,
-}
+type PropFn<'a, V, P> = Box<dyn Fn(&V) -> &P + 'a>;
+type OrdFn<'a, P> = Box<dyn Fn(&P, &P) -> Ordering + 'a>;
 
 /// Map similar to [`BTreeMap`](std::collections::BTreeMap)
 pub struct TravlMap<'a, K, V, P = V> {
@@ -39,7 +26,7 @@ pub struct TravlMap<'a, K, V, P = V> {
 impl<K, V> Debug for TravlMap<'_, K, V>
 where
     K: Debug,
-    V: Debug
+    V: Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TravlMap")
@@ -54,7 +41,7 @@ where
 
 impl<'a, K, V> Default for TravlMap<'a, K, V>
 where
-    V: Ord + 'a
+    V: Ord + 'a,
 {
     fn default() -> Self {
         Self {
@@ -69,7 +56,7 @@ where
 
 impl<'a, K, V> TravlMap<'a, K, V>
 where
-    V: Ord + 'a
+    V: Ord + 'a,
 {
     /// Creates a map
     #[must_use]
@@ -94,7 +81,7 @@ impl<'a, K, V> TravlMap<'a, K, V> {
 
 impl<'a, K, V, P> TravlMap<'a, K, V, P>
 where
-    P: Ord + 'a
+    P: Ord + 'a,
 {
     /// Creates a map using a custom property getter
     #[must_use]
@@ -111,7 +98,7 @@ where
 
 impl<'a, K, V, P> TravlMap<'a, K, V, P>
 where
-    K: Hash + Eq
+    K: Hash + Eq,
 {
     /// Returns whether the map contains a given key
     #[must_use]
@@ -121,19 +108,23 @@ where
 
     /// Returns the node associated to the given key, if it exists
     #[must_use]
-    pub fn get(&self, key: &K) -> Option<&TravlNode<'a, K, V>> {
+    pub fn get_node(&self, key: &K) -> Option<&TravlNode<'a, K, V>> {
         self.nodes.get(key)
     }
 
-    /// Finds the value within the map
+    // pub fn search_node(&self, query: SearchQuery, value: &P) -> Search<todo!(), &P> {
+    //     todo!()
+    // }
+
+    /// Returns the desired value of the node associated to the given key
     #[must_use]
-    pub fn find(&self, val: &P, search_type: SearchType) -> Option<&TravlNode<'a, K, V>> {
-        todo!();
+    pub fn get(&self, key: &K) -> Option<&P> {
+        self.get_node(key).map(|node| node.prop(&self.prop_fn))
     }
 
     /// Returns a mutable pointer to the node associate to the given key, if it exists
     #[must_use]
-    pub fn get_mut(&mut self, key: &K) -> Option<&mut TravlNode<'a, K, V>> {
+    pub fn get_node_mut(&mut self, key: &K) -> Option<&mut TravlNode<'a, K, V>> {
         self.nodes.get_mut(key)
     }
 }
@@ -141,7 +132,10 @@ where
 impl<'a, K, V, P> TravlMap<'a, K, V, P> {
     /// Creates a map using a custom property getter and ordering function
     #[must_use]
-    pub fn new_with_prop_getter_and_ordering(prop_fn: PropFn<'a, V, P>, ordering_fn: OrdFn<'a, P>) -> Self {
+    pub fn new_with_prop_getter_and_ordering(
+        prop_fn: PropFn<'a, V, P>,
+        ordering_fn: OrdFn<'a, P>,
+    ) -> Self {
         Self {
             imbalance_factor: 0,
             root_key: None,
